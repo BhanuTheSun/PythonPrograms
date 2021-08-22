@@ -1,0 +1,8 @@
+std_id,std_name,subject,marks
+101,Santosh,Maths,35
+102,Hina,English,41
+101,Santosh,Hindi,30
+102,Hina,Maths,55
+103,Rekha,science,95
+101,Santosh,Science,90
+102,Hina,Chemistry,87

@@ -1,0 +1,2 @@
+{'std_id': '103', 'std_name': 'Rekha', 'subject': 'science', 'marks': '95'}
+Total:95Total:95Total:95

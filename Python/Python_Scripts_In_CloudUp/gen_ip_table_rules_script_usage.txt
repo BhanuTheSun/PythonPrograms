@@ -1,0 +1,226 @@
+
+Python source code:
+----------------------
+
+
+zambnit@camovlx0048 # cat gen_ip_table_rules.py
+#!/usr/bin/python
+#*************************************************************************************************************************
+#Date:12-06-2018
+#
+#<-----------gen_ip_table_rules.py-------->
+#
+#Description: Script to generate IP table rules for new installation on POD
+#
+#Author: ZAMBNIT
+#Version: 1.0
+#*************************************************************************************************************************
+
+import commands
+import pexpect
+import sys
+import re
+import os
+
+if len(sys.argv) > 1 and sys.argv[1] != "":
+   pod_num = sys.argv[1]
+else:
+   pod_num = raw_input("Enter POD number : ")
+
+# Get ssh proxy IP from vipp_utils functions
+os.chdir("/home/zambnit/vtt")
+ssh_proxy = commands.getoutput("./PODv2.py site2 pod1 | grep SshProxy | awk '{print $3}' | awk -F: '{print $2}'")
+print "ssh proxy = " + ssh_proxy
+
+# Connect to jumphost
+con = pexpect.spawn("ssh root@nfv-jmp-pod-" + pod_num + ".nala")
+con.expect(":")
+con.send("test" + "\r")
+con.expect("#")
+
+# Connect to director
+con.send("ssh root@192.168.0.100" + "\r")
+con.expect(":")
+con.send("r00tme" + "\r")
+con.expect("#")
+
+con.send("ssh controller-0.localdomain" + "\r")
+con.expect("#")
+# Retrieve password value with regular expression
+
+con.send("source /home/heat-admin/openrc_ericsson" + "\r")
+con.expect("#")
+con.send("openstack endpoint list | grep nova | grep public | awk '{print $14}'" + "\r")
+con.expect("#")
+public_ip = re.findall("\d+.\d+.\d+.\d+",con.before)[0]
+print "Public endpoint ip from controller = " + public_ip
+
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("Connection to nfv-jmp-pod")
+
+# Collect data from ssh proxy
+
+print "\nCollect data from SSH PROXY:\n"
+con = pexpect.spawn("ssh root@" + ssh_proxy + "\r")
+con.expect(":")
+con.send("test" + "\r")
+con.expect("#")
+
+con.send("iptables -t nat -v -L PREROUTING -n --line-number | grep " + str(5000 + int(pod_num)) + " | awk '{print $13}'" + "\r")
+con.expect("#")
+
+old_pub_ip = re.findall("\d+.\d+.\d+.\d+",con.before.splitlines()[2])[0]
+print "Old public ip from ssh proxy = " + old_pub_ip
+
+rule_count = 0
+print "\n\nExisiting PREROUTING rules:"
+con.send("iptables -t nat -v -L PREROUTING -n --line-number | grep " + old_pub_ip + "\r")
+con.expect("#")
+for line in con.before.splitlines()[2:][:-1]:
+   print line
+   rule_count += 1
+
+print "\n#Commands to delete PREROUTING rules:"
+pre_num = con.before.splitlines()[2].split(" ")[0]
+for i in range(rule_count):
+   print "iptables -t nat -D PREROUTING " + pre_num
+print"service iptabls save"
+
+print "\n\nExisiting POSTROUTING rules:"
+con.send("iptables -t nat -v -L POSTROUTING -n --line-number | grep " + old_pub_ip + "\r")
+con.expect("#")
+for line in con.before.splitlines()[2:][:-1]:
+   print line
+
+print "\n#Commands to delete PREROUTING rules:"
+post_num = con.before.splitlines()[2].split(" ")[0]
+for i in range(rule_count):
+   print "iptables -t nat -D POSTROUTING " + post_num
+print"service iptabls save"
+
+print "\n\nExisiting FORWARD rules:"
+con.send("iptables -v -L FORWARD -n --line-number | grep " + old_pub_ip + "\r")
+con.expect("#")
+for line in con.before.splitlines()[2:][:-1]:
+   print line
+
+print "\n#Commands to delete PREROUTING rules:"
+fwd_num = con.before.splitlines()[2].split(" ")[0]
+for i in range(rule_count):
+   print "iptables -D FORWARD " + fwd_num
+print"service iptabls save"
+
+
+con.send("exit" + "\r")
+con.expect("Connection to")
+
+
+# Generate new IP tables rules with new public endpoint IP
+rules = commands.getoutput("./PODv2.py site2 pod1 gen_iptables")
+
+old_ip = re.findall("\d+.\d+.\d+.\d+",rules.splitlines()[2])[0]
+
+print "\n\n#New IP table rules for POD-" + pod_num + ":\n"
+for line in rules.splitlines()[1:]:
+   print line.replace(old_ip,public_ip)
+
+
+print "\n"
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+Usage and log:
+---------------
+
+zambnit@camovlx0048 # ./gen_ip_table_rules.py 1
+ssh proxy = 10.120.63.55
+Public endpoint ip from controller = 172.20.3.6
+
+Collect data from SSH PROXY:
+
+Old public ip from ssh proxy = 172.20.3.6
+
+
+Exisiting PREROUTING rules:
+52     494 29640 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:5001 to:172.20.3.4:5000
+53      58  3480 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:9697 to:172.20.3.4:9696
+54      14   840 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:9293 to:172.20.3.4:9292
+55    1167 70020 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8775 to:172.20.3.4:8774
+56       0     0 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:6081 to:172.20.3.4:6080
+57       0     0 DNAT       tcp  --  eth0   *       0.0.0.0/0            0.0.0.0/0           tcp dpt:8005 to:172.20.3.4:8004
+
+#Commands to delete PREROUTING rules:
+iptables -t nat -D PREROUTING 52
+iptables -t nat -D PREROUTING 52
+iptables -t nat -D PREROUTING 52
+iptables -t nat -D PREROUTING 52
+iptables -t nat -D PREROUTING 52
+iptables -t nat -D PREROUTING 52
+service iptabls save
+
+
+Exisiting POSTROUTING rules:
+56     494 29640 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:5000 to:172.20.0.2
+57      58  3480 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:9696 to:172.20.0.2
+58      14   840 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:9292 to:172.20.0.2
+59    1167 70020 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:8774 to:172.20.0.2
+60       0     0 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:6080 to:172.20.0.2
+61       0     0 SNAT       tcp  --  *      eth1    0.0.0.0/0            172.20.3.4          tcp dpt:8004 to:172.20.0.2
+
+#Commands to delete PREROUTING rules:
+iptables -t nat -D POSTROUTING 56
+iptables -t nat -D POSTROUTING 56
+iptables -t nat -D POSTROUTING 56
+iptables -t nat -D POSTROUTING 56
+iptables -t nat -D POSTROUTING 56
+iptables -t nat -D POSTROUTING 56
+service iptabls save
+
+
+Exisiting FORWARD rules:
+55    2961  331K ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:5000 state NEW,RELATED,ESTABLISHED
+56     588 49871 ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:9696 state NEW,RELATED,ESTABLISHED
+57    153K 2687M ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:9292 state NEW,RELATED,ESTABLISHED
+58    8412  844K ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:8774 state NEW,RELATED,ESTABLISHED
+59       0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:6080 state NEW,RELATED,ESTABLISHED
+60       0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            172.20.3.4          tcp dpt:8004 state NEW,RELATED,ESTABLISHED
+
+#Commands to delete PREROUTING rules:
+iptables -D FORWARD 55
+iptables -D FORWARD 55
+iptables -D FORWARD 55
+iptables -D FORWARD 55
+iptables -D FORWARD 55
+iptables -D FORWARD 55
+service iptabls save
+
+
+#New IP table rules for POD-1:
+
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 5001 -j DNAT --to-destination 172.20.3.6:5000
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 5000 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 5000 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 9697 -j DNAT --to-destination 172.20.3.6:9696
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 9696 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 9696 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 9293 -j DNAT --to-destination 172.20.3.6:9292
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 9292 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 9292 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 8775 -j DNAT --to-destination 172.20.3.6:8774
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 8774 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 8774 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 6081 -j DNAT --to-destination 172.20.3.6:6080
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 6080 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 6080 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 8005 -j DNAT --to-destination 172.20.3.6:8004
+iptables -A FORWARD -p tcp -d 172.20.3.6 --dport 8004 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth1 -p tcp --dport 8004 -d 172.20.3.6 -j SNAT --to-source 172.20.0.2
+service iptables save
+

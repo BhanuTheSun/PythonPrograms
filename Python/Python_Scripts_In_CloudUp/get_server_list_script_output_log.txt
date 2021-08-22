@@ -1,0 +1,66 @@
+
+Python source code:
+----------------------
+
+@camovlx0045 # cat get_server_list.py
+#!/usr/bin/python
+import pexpect
+import sys
+import re
+
+if len(sys.argv) > 1 and sys.argv[1] != "":
+   pod_num = sys.argv[1]
+else:
+   pod_num = raw_input("Enter POD number : ")
+
+# Connect to jumphost
+con = pexpect.spawn("ssh root@nfv-jmp-pod-" + pod_num + ".nala")
+con.expect(":")
+con.send("test" + "\r")
+con.expect("#")
+
+# Connect to director
+con.send("director" + "\r")
+con.expect("#")
+
+# Get contents of RC file and filter for OS_PASSWORD
+con.send("source stackrc" + "\r")
+con.expect("#")
+con.send("nova list" + "\r")
+con.expect("#")
+print con.before
+
+con.send("openstack server list --format value" + "\r")
+con.expect("#")
+print con.before
+# Retrieve password value with regular expression
+
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("Connection to nfv-jmp-pod")
+
+
+
+Usage and output:
+-------------------
+
+zambnit@camovlx0045 # ./get_server_list.py 1
+ nova list
++--------------------------------------+-----------------------+--------+------------+-------------+------------------------+
+| ID                                   | Name                  | Status | Task State | Power State | Networks               |
++--------------------------------------+-----------------------+--------+------------+-------------+------------------------+
+| 5001f361-a362-4b52-bffb-df0f1682abba | rhos-pod-compute-0    | ACTIVE | -          | Running     | ctlplane=192.168.0.134 |
+| 63f75842-a2bb-408d-b666-1de020a3aa94 | rhos-pod-compute-1    | ACTIVE | -          | Running     | ctlplane=192.168.0.125 |
+| 1f1fc014-defd-41b0-af2a-102819aa129e | rhos-pod-compute-2    | ACTIVE | -          | Running     | ctlplane=192.168.0.128 |
+| 1273f1a2-8ea2-4417-94ac-99e4fabeac21 | rhos-pod-controller-0 | ACTIVE | -          | Running     | ctlplane=192.168.0.132 |
++--------------------------------------+-----------------------+--------+------------+-------------+------------------------+
+[root@director ~]
+ openstack server list --format value
+1f1fc014-defd-41b0-af2a-102819aa129e rhos-pod-compute-2 ACTIVE ctlplane=192.168.0.128 overcloud-full
+5001f361-a362-4b52-bffb-df0f1682abba rhos-pod-compute-0 ACTIVE ctlplane=192.168.0.134 overcloud-full
+63f75842-a2bb-408d-b666-1de020a3aa94 rhos-pod-compute-1 ACTIVE ctlplane=192.168.0.125 overcloud-full
+1273f1a2-8ea2-4417-94ac-99e4fabeac21 rhos-pod-controller-0 ACTIVE ctlplane=192.168.0.132 overcloud-full
+[root@director ~]
+zambnit@camovlx0045 #
+zambnit@camovlx0045 #

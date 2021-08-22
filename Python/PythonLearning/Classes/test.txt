@@ -1,0 +1,2 @@
+trying to write on r+ mode file
+After closing file object again trying to write

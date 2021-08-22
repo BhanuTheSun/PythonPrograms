@@ -1,0 +1,43 @@
+::::::::::::Python scripting L1:::::::::::
+
+1. return prime numbers list in the given range of numbers.
+
+   m , n are the numbers given as input (ex: m = 11, n=95)
+   put prime numbers between m , n in a list and return that list
+
+
+   def list_prime(m,n):
+       print("Given Range",m "to",n)
+       for number in range(m,n+1):
+           counter = 0
+           for i in range(1,n+1):
+              if (number % i) == 0:
+                  counter += 1
+       	   if counter == 2:
+              prime_num_list.append(number)
+        return prime_num_list
+          
+           
+   
+2. quadratic sequence or 
+
+   input to your function can be any of the two below series of numbers you have to find out what type of series it is and return N-1,N,N+1 th terms by keeping them in a list.
+   
+   3,6,9,12,....( additive)
+   
+   2,6,18,54,....(quadratic)
+   
+   difference between two numbers is 3 this is the common criteria in all the numbers so using this find out N-1,N,N+1 th terms.
+   
+   
+   
+   2*3 =6
+   6*3=18
+   18*3=54... common in these terms is numbers are multiplied by 3 find out N-1,N,N+1 terms.
+   
+   
+   
+   
+   find out the sequence of above series and print N-1,N,N+1 th numbers put them in list and return.
+   
+   ex: return ('additive',[N-1,N,N+1]) from a function 

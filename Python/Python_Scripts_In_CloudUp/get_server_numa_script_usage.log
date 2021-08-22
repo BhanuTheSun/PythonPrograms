@@ -1,0 +1,126 @@
+Python source code:
+--------------------
+
+
+zambnit@camovlx0072 # cat get_server_numa.py
+#!/usr/bin/python
+#*************************************************************************************************************************
+#Date:06-06-2018
+#
+#<-----------get_server_numa.py-------->
+#
+#Description: Script to get NUMA details for all instances running on compute node
+#
+#Author: ZAMBNIT
+#Version: 1.0
+#*************************************************************************************************************************
+
+import pexpect
+import sys
+import re
+
+if len(sys.argv) > 1 and sys.argv[1] != "":
+   pod_num = sys.argv[1]
+else:
+   pod_num = raw_input("Enter POD number : ")
+
+if len(sys.argv) > 2 and sys.argv[2] != "":
+   compute_num = sys.argv[2]
+else:
+   compute_num = raw_input("Enter compute node number : ")
+
+
+# Connect to jumphost
+con = pexpect.spawn("ssh root@nfv-jmp-pod-" + pod_num + ".nala")
+con.expect(":")
+con.send("test" + "\r")
+con.expect("#")
+
+# Connect to director
+con.send("ssh root@192.168.0.100" + "\r")
+con.expect(":")
+con.send("r00tme" + "\r")
+con.expect("#")
+
+
+con.send("ssh compute-" + compute_num + ".localdomain" + "\r")
+con.expect("#")
+con.send("virsh list --all | grep instance | awk '{print $2}'" + "\r")
+con.expect("#")
+instance_info = con.before
+print "Instances on Compute-" + compute_num + " node : \n"
+
+instance_list = re.findall("instance-\w+",instance_info)
+
+if len(instance_list) == 0 :
+   print "No instances running on this node.\n"
+else:
+   for instance in instance_list:
+      print "Instance id :" + instance
+      con.send("virsh dumpxml " + instance + " | grep nova:name | awk -F'>' '{print $2}' | awk -F'<' '{print $1}'" + "\r")
+      con.expect("#")
+      print "Nova instance name: " + con.before.splitlines()[2]
+      con.send("virsh numatune " + instance + " | grep node | awk -F':' '{print $2}'" + "\r")
+      con.expect("#")
+      print "NUMA node : " + con.before.splitlines()[2]
+      con.send("virsh vcpupin " + instance + "\r")
+      con.expect("#")
+      for line in con.before.splitlines()[1:][:-1]:
+         print line
+      print "=================================================="
+
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("Connection to nfv-jmp-pod")
+
+zambnit@camovlx0072 #
+--------------------------------------------------------------------------------------------------------------------------------
+
+
+Usage:
+========
+
+zambnit@camovlx0072 # ./get_server_numa.py 1 1
+Instances on Compute-1 node :
+
+Instance id :instance-00000122
+Nova instance name: vipp-1374-VRP-22
+NUMA node :  0
+VCPU: CPU Affinity
+----------------------------------
+   0: 34
+   1: 14
+   2: 10
+   3: 30
+
+==================================================
+Instance id :instance-00000123
+Nova instance name: vipp-1374-VRP-21
+NUMA node :  0
+VCPU: CPU Affinity
+----------------------------------
+   0: 32
+   1: 12
+   2: 16
+   3: 36
+
+==================================================
+Instance id :instance-00000124
+Nova instance name: vipp-1374-VFRWD-2
+NUMA node :  1
+VCPU: CPU Affinity
+----------------------------------
+   0: 17
+   1: 37
+   2: 35
+   3: 15
+   4: 9
+   5: 29
+   6: 33
+   7: 13
+
+==================================================
+zambnit@camovlx0072 #

@@ -1,0 +1,4 @@
+{'std_id': '102', 'std_name': 'Hina', 'subject': 'English', 'marks': '41'}
+{'std_id': '102', 'std_name': 'Hina', 'subject': 'Maths', 'marks': '55'}
+{'std_id': '102', 'std_name': 'Hina', 'subject': 'Chemistry', 'marks': '87'}
+Total:183Total:183Total:183

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="0" failures="7" hostname="DESKTOP-323H2A8" name="pytest" skipped="2" tests="18" time="0.600" timestamp="2021-07-10T21:39:43.237852"><testcase classname="test_compare" name="test_greater" time="0.004"><skipped message="" type="pytest.xfail" /></testcase><testcase classname="test_compare" name="test_greater_equal" time="0.004" /><testcase classname="test_compare" name="test_less" time="0.002"><skipped message="unconditional skip" type="pytest.skip">C:\PythonLearning\pytest_practice\test_compare.py:15: unconditional skip</skipped></testcase><testcase classname="test_fixture" name="test_divisible_by_3" time="0.004" /><testcase classname="test_fixture" name="test_divisible_by_6" time="0.005"><failure message="assert 3 == 0&#10;  +3&#10;  -0">input_value = 39
+
+    @pytest.mark.devide
+    def test_divisible_by_6(input_value):
+&gt;      assert input_value % 6 == 0
+E      assert 3 == 0
+E        +3
+E        -0
+
+test_fixture.py:9: AssertionError</failure></testcase><testcase classname="test_fixture1" name="test_divisible_by_13" time="0.004" /><testcase classname="test_mul" name="test_multiplication_11[1-11]" time="0.004" /><testcase classname="test_mul" name="test_multiplication_11[2-22]" time="0.004" /><testcase classname="test_mul" name="test_multiplication_11[3-35]" time="0.005"><failure message="assert 33 == 35&#10;  +33&#10;  -35">num = 3, output = 35
+
+    @pytest.mark.parametrize("num, output",[(1,11),(2,22),(3,35),(4,44)])
+    def test_multiplication_11(num, output):
+&gt;      assert 11*num == output
+E      assert 33 == 35
+E        +33
+E        -35
+
+test_mul.py:5: AssertionError</failure></testcase><testcase classname="test_mul" name="test_multiplication_11[4-44]" time="0.004" /><testcase classname="test_mul" name="test_prime[1]" time="0.004"><failure message="assert 1 == 0&#10;  +1&#10;  -0">num = 1
+
+    @pytest.mark.parametrize("num",[1,2,3,4,5])
+    def test_prime(num):
+&gt;       assert num%2 == 0
+E       assert 1 == 0
+E         +1
+E         -0
+
+test_mul.py:10: AssertionError</failure></testcase><testcase classname="test_mul" name="test_prime[2]" time="0.004" /><testcase classname="test_mul" name="test_prime[3]" time="0.005"><failure message="assert 1 == 0&#10;  +1&#10;  -0">num = 3
+
+    @pytest.mark.parametrize("num",[1,2,3,4,5])
+    def test_prime(num):
+&gt;       assert num%2 == 0
+E       assert 1 == 0
+E         +1
+E         -0
+
+test_mul.py:10: AssertionError</failure></testcase><testcase classname="test_mul" name="test_prime[4]" time="0.004" /><testcase classname="test_mul" name="test_prime[5]" time="0.004"><failure message="assert 1 == 0&#10;  +1&#10;  -0">num = 5
+
+    @pytest.mark.parametrize("num",[1,2,3,4,5])
+    def test_prime(num):
+&gt;       assert num%2 == 0
+E       assert 1 == 0
+E         +1
+E         -0
+
+test_mul.py:10: AssertionError</failure></testcase><testcase classname="test_sqrt" name="test_sqrt" time="0.004" /><testcase classname="test_sqrt" name="testsquare" time="0.004"><failure message="assert 49 == 40&#10;  +49&#10;  -40">@pytest.mark.square
+    def testsquare():
+       num = 7
+&gt;      assert 7*7 == 40
+E      assert 49 == 40
+E        +49
+E        -40
+
+test_sqrt.py:12: AssertionError</failure></testcase><testcase classname="test_sqrt" name="testequality" time="0.005"><failure message="assert 10 == 11&#10;  +10&#10;  -11">@pytest.mark.others
+    def testequality():
+&gt;      assert 10 == 11
+E      assert 10 == 11
+E        +10
+E        -11
+
+test_sqrt.py:16: AssertionError</failure></testcase></testsuite></testsuites>

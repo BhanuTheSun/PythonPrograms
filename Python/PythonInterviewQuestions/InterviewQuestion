@@ -1,0 +1,183 @@
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::Python Interview Quetions::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+1) different datatypes in python?
+2) difference between list,tuple?
+3) what is set?  
+4) what is dictionary?
+Ans: 
+    List is a collection which is ordered and changeable. Allows duplicate members.
+    Tuple is a collection which is ordered and unchangeable. Allows duplicate members.
+    Set is a collection which is unordered and unindexed. No duplicate members.
+    Dictionary is a collection which is unordered, changeable and indexed. No duplicate members.
+
+can we have list as key ? not answered
+5) How to access sub list of a list?
+ex: A = [1,2,3,4,5,6]
+ i) pring sublist of 3,4,5 using  Ans: A[2:5]
+ii) A[:4] what it will print?
+ Ans: [1,2,3,4]
+iii) A[3:]
+Ans: [4,5,6]
+iv) A[-5:-2] 
+Ans: [2,3,4]
+
+6) can we use list as a key for dictionary?
+Ans:
+since list is mutable we cannot use it as a key but we can use tuple as a dictionary key.
+
+7) how to remove duplicates of a list using fromkeys() method?
+Ans: list = ["stg_mast","stg_mast","stg_rcd","stg_licence"]
+     duplicates_removed = list(dict.fromkeys(list))
+     here 'list' is key and value parameter is optional
+     output of dict.fromkeys("stg_mast":None, "stg_rcd":None, "stg_licence":None)
+
+7) How to access elements of list and tuple and set?
+Ans: yes
+8) can we modify elements of a list?
+Ans: yes
+9) can we modify elements of a tuple?
+Ans: no, because tuple is immutable.
+10) can we modify elements of a set?
+Ans: No, we can add one or more elements but cannot modify existing element and it will not support indexing.
+11) How to access Dictionary elements?
+Ans: we can access using items() , values(), or by using key , keys() can be used to access only keys of a dictionary
+12) what is a class,what is an object?
+13) How to declare a class?
+Ans: using class keyword 
+ex: class Student:
+        pass
+14) what is __init__(self) method in class?
+Ans: it is a constructor of the class
+
+15) How to create an object of a class?
+Ans: s1 = Student()
+
+16) How to access a function inside a class?
+Ans: using class object.
+ex: s1.myfunc()
+
+17) what is inheritence?
+
+18) syntax to inherite parent class 'A' to Child class 'B'?
+Ans: class B(A):
+        pass
+19) what is a module?  --> 
+Ans: module is file containing a set of functions, we can include this functions where ever we want.
+
+20) how to access a function add() from a module called maths in our application?
+Ans: import maths then access add using maths.add()
+or 
+from maths import add
+then access it directly as add() instead of  maths.add()
+
+3) why we use lambda function instead of regular function?
+Ans:
+
+
+
+--> 
+1) can we make dictionary elements to be printed in order?
+Ans:yes, from python 3.7 all the dictionary elements preserve the insertion order.
+
+2) what is the performance advantage between list and tuple?
+Ans: tuple offers better performance when compared to list because tuple cannot be extended so it is fixed in the memory block once it is defined.
+     but list can be extended so it changes.
+In python we have two types of objects. 1. Mutable,  2. Immutable. In python lists comes under mutable objects and tuples comes under immutable objects.
+
+    Tuples are stored in a single block of memory. Tuples are immutalbe so, It doesn't require extraspace to store new objects.
+    Lists are allocated in two blocks: the fixed one with all the Python object information and a variable sized block for the data.
+    It is the reason creating a tuple is faster than List.
+    It also explains the slight difference in indexing speed is faster than lists, because in tuples for indexing it follows fewer pointers.
+
+Advantages using tuples:
+
+    Tuples is that they use less memory where lists use more memory
+    We can use tuples in a dictionary as a key but it's not possible with lists
+    We can access element with an index in both tuples and lists
+
+Disadvantages of tuples
+
+    We cannot add an element to tuple but we can add element to list.
+    We can't sort a tuple but in a list we can sort by calling "list.sort()" method.
+    We can't remove an element in tuple but in list we can remove element
+    We can't replace an element in tuple but you can in a list
+
+
+
+
+example:
+>>> dictionary={("Bhanu","Chander"):(1,2)}
+>>> dictionary
+{('Bhanu', 'Chander'): (1, 2)}
+>>> dictionary["Bhanu"]
+Traceback (most recent call last):
+  File "<pyshell#129>", line 1, in <module>
+    dictionary["Bhanu"]
+KeyError: 'Bhanu'
+>>> dictionary[("Bhanu","Chander")]
+(1, 2)
+>>> dictionary[("Bhanu")]
+Traceback (most recent call last):
+  File "<pyshell#131>", line 1, in <module>
+    dictionary[("Bhanu")]
+KeyError: 'Bhanu'
+
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::Quetion-1::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+mylist=[10,11,12,13,0,7,6,14,-1,21,-7]
+
+n=len(mylist)
+
+print(n)
+
+for i in range(n):
+  for j in range(n):
+    if(mylist[i]+mylist[j]==13):
+        print("Index %d and Index %d makes 13 "%(i,j))
+    
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::Quetion-2:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+string="aabbbcccdddpzzppppaaaaaazzzzzzzzaaaa"
+
+ac=bc=cc=dc=pc=zc=pc=0
+n=len(string)
+for i in range(n):
+  if(string[i]=='a'):
+    ac+=1
+  elif(string[i]=='b'):
+    bc+=1
+  elif(string[i]=='c'):
+    cc+=1
+  elif(string[i]=='d'):
+    dc+=1
+  elif(string[i]=='p'):
+    pc+=1
+  elif(string[i]=='z'):
+    zc+=1
+
+characters=['a','b','c','d','p','z']
+counters=[]
+counters.append(ac)
+counters.append(bc)
+counters.append(cc)
+counters.append(dc)
+counters.append(pc)
+counters.append(zc)
+
+
+dictionary=dict(zip(counters,characters))
+print(dictionary)
+
+mylist=dictionary.keys()
+
+large=counters[0]
+length=len(counters)
+for i in range(length):
+  if(counters[i]>large):
+    large=counters[i]
+    
+print("Character which makes longest repetation is ",dictionary[large])
+    

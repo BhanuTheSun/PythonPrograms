@@ -1,0 +1,57 @@
+zambnit@camovlx0045 # cat get_admin_pass.py
+#!/usr/bin/python
+#*************************************************************************************************************************
+#Date:14-05-2018
+#
+#<-----------get_admin_pass.py-------->
+#
+#Description: Script to get admin password for admin operations on RedHat openstack
+#
+#Author: ZAMBNIT
+#Version: 1.0
+#*************************************************************************************************************************
+import pexpect
+import time
+import sys
+import re
+
+if len(sys.argv) > 1 and sys.argv[1] != "":
+   pod_num = sys.argv[1]
+else:
+   pod_num = raw_input("Enter POD number : ")
+
+# Connect to jumphost
+con = pexpect.spawn("ssh root@nfv-jmp-pod-" + pod_num + ".nala")
+con.expect(":")
+con.send("test" + "\r")
+con.expect("#")
+
+# Connect to director
+con.send("director" + "\r")
+con.expect("#")
+
+# Get contents of RC file and filter for OS_PASSWORD
+con.send("cat /home/stack/rhos-podrc.v3 | grep OS_PASSWORD" + "\r")
+con.expect("#")
+pass_text = con.before
+
+# Retrieve password value with regular expression
+password = re.search("(\w+)=(\w+)",pass_text).group(2)
+print "Admin passwd = " + password
+
+con.send("exit" + "\r")
+con.expect("#")
+con.send("exit" + "\r")
+con.expect("Connection to nfv-jmp-pod")
+zambnit@camovlx0045 #
+zambnit@camovlx0045 #
+zambnit@camovlx0045 #
+zambnit@camovlx0045 # ./get_admin_pass.py
+Enter POD number : 1
+Admin passwd = Usc7WGG3Qk6Aw3vx2Kz4mvNrq
+zambnit@camovlx0045 #
+zambnit@camovlx0045 #
+zambnit@camovlx0045 #
+zambnit@camovlx0045 # ./get_admin_pass.py 1
+Admin passwd = Usc7WGG3Qk6Aw3vx2Kz4mvNrq
+zambnit@camovlx0045 #
